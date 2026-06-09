@@ -21,6 +21,18 @@ The package is currently distributed directly from GitHub. Install using:
 pip install git+https://github.com/bjarkeh97/npearth  
 ```
 
+### Platform notes
+
+`npearth` depends on `numba` and `llvmlite`. Pre-built wheels exist for Linux (x86_64, aarch64), Windows (amd64), and Apple Silicon macOS (arm64). For these platforms, `pip install` works directly.
+
+**Intel macOS (x86_64):** Numba's official `llvmlite` wheels are not published for Intel Macs from `llvmlite 0.46` onwards. There are two options:
+
+- Stay on `numba <= 0.62.x` (the last version with Intel Mac wheels). This is the easiest path and what this project currently uses for local development on Intel Macs.
+- Use [conda-forge](https://conda-forge.org/), which provides pre-built Intel Mac binaries:
+  ```
+  conda install -c conda-forge numba
+  ```
+
 ## Quick start
 
 ```
@@ -92,9 +104,12 @@ To contribute:
 The following items could be interesting for future releases:
 
 * Packaging and release on PyPI
-* Model diagnostics, including ANOVA decompositions as in Friedman (1991)
-* Additional statistical summaries and tools like confidence intervals
+* Model diagnostics, including ANOVA decompositions as in Friedman (1991) 
+  ** Plot per variable and two-interactions
+* Feature importance
+* Additional statistical summaries and tools like confidence intervals (Not true as this is not BMARS)
 * Bagging
+* Handle nan features -  how?
 
 ## License
 

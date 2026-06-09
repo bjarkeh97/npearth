@@ -4,7 +4,11 @@ from npearth._knotsearcher_base import KnotSearcherBase
 from npearth._knotsearcher_svd import KnotSearcherSVD
 from npearth._knotsearcher_cholesky import KnotSearcherCholesky
 from npearth._knotsearcher_cholesky_numba import KnotSearcherCholeskyNumba
+from typing import Optional, Type
 from copy import deepcopy
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class ForwardPasser:
@@ -18,16 +22,16 @@ class ForwardPasser:
         y: np.ndarray,
         M_max: float,
         sample_weights: np.ndarray,
-        KnotSearcher: KnotSearcherBase = KnotSearcherCholeskyNumba,
+        KnotSearcher: Type[KnotSearcherBase] = KnotSearcherCholeskyNumba,
         ridge: float = 1e-8,
     ) -> tuple[list, list[BasisFunction]]:
         bx = BasisMatrix(X=X)
-        lof_star = np.inf
         M = 1
-
+        coeffs_star = [np.sum(y * sample_weights) / np.sum(sample_weights)]
+        lof_star = sum(sample_weights * (y - coeffs_star[0])**2)
         while M <= M_max:
             last_lof = lof_star
-            m_star, v_star, t_star, coeffs_star = None, None, None, None
+            m_star, v_star, t_star = None, None, None
             for m in range(M):
                 vs_in_m = bx.basis[m].return_variables_used()
                 vs_not_in_m = [v for v in range(bx.n) if v not in vs_in_m]
@@ -46,9 +50,7 @@ class ForwardPasser:
                         t_star = t
                         coeffs_star = coeffs
             if lof_star == last_lof:
-                print(
-                    f"No improvement in LOF after {M} terms. LOF: {lof_star}, m*: {m_star}"
-                )
+                logger.info("Forward pass terminated at %d basis functions (LOF=%.6g)", M, lof_star)
                 # self.coefs = coeffs_star
                 # self.bx = bx
                 # return self.coefs, bx.basis

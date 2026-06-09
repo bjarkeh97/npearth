@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import numpy as np
-from typing import Optional
+from typing import Optional, Type
 from npearth._forward_pass import ForwardPasser
 from npearth._knotsearcher_base import KnotSearcherBase
 from npearth._knotsearcher_cholesky import KnotSearcherCholesky
@@ -16,7 +16,7 @@ class EARTH:
         M_max: int = 15,
         ridge: float = 1e-6,
         d: float = 3,
-        knot_searcher: KnotSearcherBase = KnotSearcherCholeskyNumba,
+        knot_searcher: Type[KnotSearcherBase] = KnotSearcherCholeskyNumba,
         prune_model: bool = True,
     ) -> None:
         """
@@ -64,8 +64,8 @@ class EARTH:
         self.knot_searcher = knot_searcher
         self.prune_model = prune_model
         self.d = d
-        self.coef_: Optional[list[BasisFunction]] = None
-        self.basis_: Optional[list] = None
+        self.coef_: Optional[list] = None
+        self.basis_: Optional[list[BasisFunction]] = None
 
     def _get_sample_weight(
         self, sample_weight: np.ndarray, y: np.ndarray

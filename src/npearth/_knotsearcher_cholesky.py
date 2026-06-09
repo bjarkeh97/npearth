@@ -1,10 +1,11 @@
 import numpy as np
-from numba import njit
-from copy import deepcopy, copy
+from copy import copy
 
 from npearth._cholesky_update import cholupdate, choldowndate, cholsolve
 from npearth._knotsearcher_base import KnotSearcherBase
+import logging
 
+logger = logging.getLogger(__name__)
 
 class KnotSearcherCholesky(KnotSearcherBase):
 
@@ -63,6 +64,8 @@ class KnotSearcherCholesky(KnotSearcherBase):
         D_u = 0
         F_u = 0
 
+        skip_counter = 0
+
         for i, t in enumerate(xv_sorted):
             if i == N - 1 or i == 0:
                 continue  # Skip first and last index
@@ -109,8 +112,18 @@ class KnotSearcherCholesky(KnotSearcherBase):
             # We update the L matrix using cholupdate and choldowndate
             dVM = V[:, M - 1] - V_m_old
             if np.all(dVM == 0):
+                u = t
+                last_last_i = last_i
+                last_i = i
+                continue 
+            denom = dVM[-1]
+            if denom <= 0:
+                u = t
+                last_last_i = last_i
+                last_i = i
+                skip_counter += 1
                 continue
-            x_u = dVM / np.sqrt(dVM[-1])
+            x_u = dVM / np.sqrt(denom)
             x_d = np.copy(x_u)
             x_d[M - 1] = 0
             L = choldowndate(cholupdate(L, x_u), x_d)
@@ -125,11 +138,14 @@ class KnotSearcherCholesky(KnotSearcherBase):
                 ssr_min = SSR
                 a_best = a
                 t_star = t
-
             u = t
             last_last_i = last_i
             last_i = i
-
+        if skip_counter > 0:
+            logger.info(
+                f"Skipped {skip_counter} knots due to denom<=0. "
+                f"(ridge={self.ridge:.1e}, m={self.m}, basis_size={M})"
+            )
         return ssr_min, t_star, a_best
 
 

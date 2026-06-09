@@ -75,10 +75,6 @@ def test_sample_weights():
 
     assert r2 > 0.9
 
-
-test_sample_weights()
-
-
 def test_sklearn_api_params():
     m = EARTH(M_max=5, ridge=1e-5, prune_model=False)
 

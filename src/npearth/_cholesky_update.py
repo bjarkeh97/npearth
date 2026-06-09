@@ -86,12 +86,14 @@ def cholsolve(L: np.ndarray, b: np.ndarray) -> np.ndarray:
     return x
 
 
-if __name__ == "__main__" or True:  # always warm up when imported
-    _L = np.eye(4)
-    _x = np.ones(4)
-    cholupdate(_L.copy(), _x.copy())
-    choldowndate(_L.copy(), _x.copy())
-    cholsolve(_L.copy(), _x.copy())
+def _warmup_jit():
+      L = np.eye(4)
+      x = np.ones(4)
+      cholupdate(L.copy(), x.copy())
+      choldowndate(L.copy(), x.copy())
+      cholsolve(L.copy(), x.copy())
+      
+_warmup_jit()
 
 
 if __name__ == "__main__":
